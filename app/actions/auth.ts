@@ -107,8 +107,7 @@ export async function loginAction(formData: FormData): Promise<AuthResult> {
 
   const { phone, password } = parsed.data;
   const email = phoneToEmail(phone);
-  const supabase = createClient();
-
+  try {
     // If Supabase is in placeholder/mock mode locally, log in directly:
     const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder');
     if (isMock) {
