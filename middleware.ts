@@ -27,13 +27,11 @@ export async function middleware(request: NextRequest) {
   // Check for local development demo cookie
   const localUserCookie = request.cookies.get('vldd_local_user')?.value;
   let user: { id: string } | null = null;
-  let userRole = 'student';
 
   if (localUserCookie) {
     try {
       const parsed = JSON.parse(localUserCookie);
       user = { id: 'mock-user-123' };
-      userRole = parsed.role || 'student';
     } catch {}
   }
 
@@ -76,18 +74,11 @@ export async function middleware(request: NextRequest) {
 
       if (session?.user) {
         user = session.user;
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-        userRole = profile?.role || 'student';
       }
     } catch {}
   }
 
   const isAuthRoute = pathname === '/login' || pathname === '/register';
-  const isAdminRoute = pathname.startsWith('/admin');
 
   // If already logged in and visiting login/register -> redirect to /batch/entrance
   if (user && isAuthRoute) {
@@ -99,25 +90,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // If admin route and user is not admin -> return 404
-  if (isAdminRoute && userRole !== 'admin') {
-    return NextResponse.rewrite(new URL('/_not-found', request.url));
-  }
-
-  // Root path redirect
-  if (pathname === '/') {
-    if (user) {
-      return NextResponse.redirect(new URL('/batch/entrance', request.url));
-    } else {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-  }
-
   return response;
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|img|favicon.ico|icon.svg|assets|styleguide|.*\\..*).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg|img/|assets/|styleguide).*)'],
 };

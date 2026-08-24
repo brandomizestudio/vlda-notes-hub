@@ -25,18 +25,26 @@ export async function generateMetadata({ params }: BatchPageProps): Promise<Meta
 }
 
 export default async function BatchPage({ params }: BatchPageProps) {
-  const { profile } = await requireUser();
-  const batches = await getBatches();
+  // Parallelize user check and batch lookup
+  const [{ profile }, batches] = await Promise.all([
+    requireUser(),
+    getBatches(),
+  ]);
+
   const batch = batches.find((b) => b.id === params.slug);
 
   if (!batch) {
     notFound();
   }
 
-  const allNotes = await getNotesByBatch(batch.id);
+  // Parallelize notes query and unlocks query
+  const [allNotes, unlockedNoteIds] = await Promise.all([
+    getNotesByBatch(batch.id),
+    getUserUnlocks(profile.id),
+  ]);
+
   const freeNotes = allNotes.filter((n) => n.tier === 'free');
   const paidNotes = allNotes.filter((n) => n.tier === 'paid');
-  const unlockedNoteIds = await getUserUnlocks(profile.id);
 
   return (
     <BatchView

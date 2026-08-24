@@ -13,7 +13,7 @@ export default function AuthLayout({
         {/* Background Image with 88% brand overlay */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/img/auth-hero.png"
+            src="/img/auth-hero.webp"
             alt="VLDD Student studying"
             fill
             priority

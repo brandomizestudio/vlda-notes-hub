@@ -10,6 +10,7 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
+  console.time('layout:total_render');
   const { profile } = await requireUser();
   const unlocks = await getUserUnlocks(profile.id);
   const settings = await getSettings();
@@ -18,7 +19,7 @@ export default async function AppLayout({
   const siteNotice = settings.site_notice || FALLBACK_SETTINGS.site_notice;
   const isNoticeActive = settings.site_notice_active === 'true';
 
-  return (
+  const res = (
     <div className="min-h-screen bg-ground flex flex-col justify-between">
       <div>
         <AppHeader
@@ -63,4 +64,6 @@ export default async function AppLayout({
       </footer>
     </div>
   );
+  console.timeEnd('layout:total_render');
+  return res;
 }

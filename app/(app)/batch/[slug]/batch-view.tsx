@@ -24,7 +24,7 @@ export function BatchView({
   unlockedNoteIds,
 }: BatchViewProps) {
   const router = useRouter();
-  const bannerImg = batch.id === 'year' ? '/img/batch-year.png' : '/img/batch-entrance.png';
+  const bannerImg = batch.id === 'year' ? '/img/batch-year.webp' : '/img/batch-entrance.webp';
 
   const handleNoteAction = (noteId: string, tier: 'free' | 'paid', isUnlocked: boolean) => {
     router.push(`/note/${noteId}`);
@@ -60,7 +60,7 @@ export function BatchView({
 
         {freeNotes.length === 0 ? (
           <EmptyState
-            imageSrc="/img/empty-notes.png"
+            imageSrc="/img/empty-notes.webp"
             message="Is batch me abhi koi note nahi hai. Jaldi aa raha hai."
           />
         ) : (
@@ -92,7 +92,7 @@ export function BatchView({
 
         {paidNotes.length === 0 ? (
           <EmptyState
-            imageSrc="/img/empty-locked.png"
+            imageSrc="/img/empty-locked.webp"
             message="Is batch me abhi koi full note upload nahi hua hai."
           />
         ) : (

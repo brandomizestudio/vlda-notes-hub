@@ -12,14 +12,14 @@ export const BATCHES: BatchDef[] = [
     slug: 'entrance',
     title: 'VLDD Entrance Exam',
     subtitle: 'Physics, Chemistry, Biology aur General Aptitude ke syllabus-aligned complete notes.',
-    bannerImage: '/img/batch-entrance.png',
+    bannerImage: '/img/batch-entrance.webp',
   },
   {
     id: 'year',
     slug: 'year',
     title: 'VLDD 1st & 2nd Year',
-    subtitle: 'Anatomy, Physiology, Pharmacology, Medicine aur Solved Question Papers.',
-    bannerImage: '/img/batch-year.png',
+    subtitle: 'Diploma subjects ke topic-wise handwritten aur clear diagrams waale complete notes.',
+    bannerImage: '/img/batch-year.webp',
   },
 ];
 

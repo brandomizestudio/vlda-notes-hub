@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
-import { notFound } from 'next/navigation';
+import { cache } from 'react';
+import { redirect, notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { Profile } from '@/types/database';
 
@@ -19,25 +19,29 @@ export function emailToPhone(email: string): string {
 }
 
 /**
- * Retrieves the currently authenticated user's session and profile
+ * Retrieves the currently authenticated user's session and profile (cached per request)
  */
-export async function getSession(): Promise<{
+export const getSession = cache(async (): Promise<{
   user: { id: string; email?: string } | null;
   profile: Profile | null;
-}> {
+}> => {
   const supabase = createClient();
 
   try {
+    console.time('auth:supabase.auth.getSession');
     const {
       data: { session },
     } = await supabase.auth.getSession();
+    console.timeEnd('auth:supabase.auth.getSession');
 
     if (session?.user) {
+      console.time('auth:supabase.profiles.select');
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', session.user.id)
         .single();
+      console.timeEnd('auth:supabase.profiles.select');
 
       if (profile) {
         return {
@@ -69,7 +73,7 @@ export async function getSession(): Promise<{
   } catch {}
 
   return { user: null, profile: null };
-}
+});
 
 /**
  * Requires a logged-in user. If not logged in, redirects to /login.

@@ -42,7 +42,7 @@ export default async function MyNotesPage() {
 
       {myNotes.length === 0 ? (
         <EmptyState
-          imageSrc="/img/empty-notes.png"
+          imageSrc="/img/empty-notes.webp"
           title="Koi note unlock nahi hai"
           message="Abhi tak koi note unlock nahi kiya. Section 2 me jaake dekho."
           action={

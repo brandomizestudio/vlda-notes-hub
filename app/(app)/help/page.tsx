@@ -59,7 +59,7 @@ export default async function HelpPage() {
         {/* Banner Illustration #7 */}
         <div className="relative w-full h-[140px] sm:h-[180px] rounded-[14px] overflow-hidden border border-line bg-card-2 p-2">
           <Image
-            src="/img/pay-steps.png"
+            src="/img/pay-steps.webp"
             alt="Payment Steps: QR scan -> WhatsApp password -> PDF Unlock"
             fill
             className="object-contain"

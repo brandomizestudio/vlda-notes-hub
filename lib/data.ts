@@ -1,6 +1,13 @@
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
-import { NotePublic, Batch, Setting } from '@/types/database';
+import { NotePublic, Batch } from '@/types/database';
 import { BATCHES, FALLBACK_SETTINGS } from '@/lib/constants';
+
+const isSupabaseConfigured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder') &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 // Realistic fallback seed notes for instant local preview
 const FALLBACK_NOTES: (NotePublic & { pdf_password?: string; file_path?: string })[] = [
@@ -130,12 +137,14 @@ const FALLBACK_NOTES: (NotePublic & { pdf_password?: string; file_path?: string 
   },
 ];
 
-export async function getBatches(): Promise<Batch[]> {
-  try {
-    const supabase = createClient();
-    const { data } = await supabase.from('batches').select('*').eq('is_active', true).order('sort_order');
-    if (data && (data as any[]).length > 0) return data as Batch[];
-  } catch {}
+export const getBatches = cache(async (): Promise<Batch[]> => {
+  if (isSupabaseConfigured) {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase.from('batches').select('*').eq('is_active', true).order('sort_order');
+      if (data && (data as any[]).length > 0) return data as Batch[];
+    } catch {}
+  }
 
   return BATCHES.map((b, idx) => ({
     id: b.id,
@@ -144,39 +153,45 @@ export async function getBatches(): Promise<Batch[]> {
     sort_order: idx + 1,
     is_active: true,
   }));
-}
+});
 
-export async function getNotesByBatch(batchId: string): Promise<NotePublic[]> {
-  try {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from('notes_public')
-      .select('*')
-      .eq('batch_id', batchId)
-      .order('sort_order');
-    if (data && (data as any[]).length > 0) return data as NotePublic[];
-  } catch {}
+export const getNotesByBatch = cache(async (batchId: string): Promise<NotePublic[]> => {
+  if (isSupabaseConfigured) {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('notes_public')
+        .select('*')
+        .eq('batch_id', batchId)
+        .order('sort_order');
+      if (data && (data as any[]).length > 0) return data as NotePublic[];
+    } catch {}
+  }
 
   return FALLBACK_NOTES.filter((n) => n.batch_id === batchId && n.is_published);
-}
+});
 
-export async function getNoteById(noteId: string): Promise<NotePublic | null> {
-  try {
-    const supabase = createClient();
-    const { data } = await supabase.from('notes_public').select('*').eq('id', noteId).single();
-    if (data) return data as NotePublic;
-  } catch {}
+export const getNoteById = cache(async (noteId: string): Promise<NotePublic | null> => {
+  if (isSupabaseConfigured) {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase.from('notes_public').select('*').eq('id', noteId).single();
+      if (data) return data as NotePublic;
+    } catch {}
+  }
 
   const match = FALLBACK_NOTES.find((n) => n.id === noteId);
   return match || null;
-}
+});
 
-export async function getUserUnlocks(userId: string): Promise<string[]> {
-  try {
-    const supabase = createClient();
-    const { data } = await supabase.from('unlocks').select('*').eq('user_id', userId);
-    if (data) return (data as any[]).map((u: any) => u.note_id as string);
-  } catch {}
+export const getUserUnlocks = cache(async (userId: string): Promise<string[]> => {
+  if (isSupabaseConfigured) {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase.from('unlocks').select('*').eq('user_id', userId);
+      if (data) return (data as any[]).map((u: any) => u.note_id as string);
+    } catch {}
+  }
 
   // Check local demo unlocks cookie if in demo mode
   try {
@@ -188,16 +203,18 @@ export async function getUserUnlocks(userId: string): Promise<string[]> {
   } catch {}
 
   return [];
-}
+});
 
-export async function getSettings(): Promise<Record<string, string>> {
-  try {
-    const supabase = createClient();
-    const { data } = await supabase.from('settings').select('*');
-    if (data && (data as any[]).length > 0) {
-      return (data as any[]).reduce((acc: Record<string, string>, cur: any) => ({ ...acc, [cur.key]: cur.value }), {});
-    }
-  } catch {}
+export const getSettings = cache(async (): Promise<Record<string, string>> => {
+  if (isSupabaseConfigured) {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase.from('settings').select('*');
+      if (data && (data as any[]).length > 0) {
+        return (data as any[]).reduce((acc: Record<string, string>, cur: any) => ({ ...acc, [cur.key]: cur.value }), {});
+      }
+    } catch {}
+  }
 
   return FALLBACK_SETTINGS;
-}
+});
