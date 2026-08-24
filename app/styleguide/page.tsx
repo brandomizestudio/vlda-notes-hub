@@ -411,7 +411,7 @@ export default function StyleguidePage() {
           </div>
 
           <EmptyState
-            icon={<FileText className="w-8 h-8" />}
+            imageSrc="/img/empty-notes.png"
             title="Koi note nahi mila"
             message="Is batch me abhi koi note nahi hai. Jaldi aa raha hai."
             action={

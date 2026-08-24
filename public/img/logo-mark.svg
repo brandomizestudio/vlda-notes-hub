@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Rounded square background in deep veterinary green #0F6B5C -->
+  <rect width="512" height="512" rx="112" fill="#0F6B5C" />
+  
+  <!-- Subtle inner border -->
+  <rect x="12" y="12" width="488" height="488" rx="100" fill="none" stroke="#E2EFEB" stroke-width="4" stroke-opacity="0.2" />
+
+  <!-- Marigold accent dot / halo -->
+  <circle cx="256" cy="116" r="14" fill="#E39A12" />
+
+  <!-- Cow head line-art + Open Book below in white with uniform thick strokes -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Horns & Ears -->
+    <path d="M 168 180 C 140 160, 120 140, 116 116 C 140 120, 168 144, 184 168" />
+    <path d="M 344 180 C 372 160, 392 140, 396 116 C 372 120, 344 144, 328 168" />
+    
+    <!-- Ears -->
+    <path d="M 152 208 C 120 200, 96 216, 92 232 C 112 240, 140 236, 160 224" />
+    <path d="M 360 208 C 392 200, 416 216, 420 232 C 400 240, 372 236, 352 224" />
+
+    <!-- Forehead & Face contour -->
+    <path d="M 184 172 C 220 162, 292 162, 328 172" />
+    <path d="M 174 216 L 188 284 C 192 304, 212 320, 236 320 L 276 320 C 300 320, 320 304, 324 284 L 338 216" />
+
+    <!-- Snout / Muzzle contour -->
+    <path d="M 204 276 C 204 260, 308 260, 308 276 C 308 304, 204 304, 204 276 Z" />
+    <!-- Nostrils -->
+    <ellipse cx="236" cy="280" rx="6" ry="8" fill="#FFFFFF" />
+    <ellipse cx="276" cy="280" rx="6" ry="8" fill="#FFFFFF" />
+
+    <!-- Eyes -->
+    <circle cx="210" cy="216" r="7" fill="#FFFFFF" stroke="none" />
+    <circle cx="302" cy="216" r="7" fill="#FFFFFF" stroke="none" />
+
+    <!-- Open Book Below Face -->
+    <!-- Spine center -->
+    <line x1="256" y1="362" x2="256" y2="432" stroke="#E39A12" stroke-width="16" />
+    
+    <!-- Left Page -->
+    <path d="M 256 376 C 216 352, 160 354, 116 368 L 116 432 C 160 418, 216 416, 256 432" />
+    <!-- Right Page -->
+    <path d="M 256 376 C 296 352, 352 354, 396 368 L 396 432 C 352 418, 296 416, 256 432" />
+    
+    <!-- Page detail lines -->
+    <path d="M 148 392 C 180 382, 220 384, 244 394" stroke-width="10" stroke-opacity="0.7" />
+    <path d="M 364 392 C 332 382, 292 384, 268 394" stroke-width="10" stroke-opacity="0.7" />
+  </g>
+</svg>

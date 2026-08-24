@@ -23,12 +23,17 @@ export default function HomePage() {
           Phase 1 (Foundation & Design System) is ready. Click below to inspect the design tokens, components, and live theme switcher.
         </p>
 
-        <div className="pt-2">
+        <div className="pt-2 flex flex-col gap-3">
           <Link href="/styleguide" className="block">
             <Button variant="primary" className="w-full gap-2 text-[15px]">
               <Sparkles className="w-4 h-4" />
               Open Design System & Styleguide
               <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/assets" className="block">
+            <Button variant="ghost" className="w-full gap-2 text-[14px]">
+              Review Phase 2 Visual Assets (9 Items)
             </Button>
           </Link>
         </div>
