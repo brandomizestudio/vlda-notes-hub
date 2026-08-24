@@ -17,10 +17,13 @@ export default function AuthLayout({
             alt="VLDD Student studying"
             fill
             priority
-            className="object-cover opacity-25 mix-blend-luminosity"
+            className="object-cover opacity-20"
             sizes="50vw"
           />
-          <div className="absolute inset-0 bg-brand/88 backdrop-brightness-95" />
+          <div
+            className="absolute inset-0"
+            style={{ backgroundColor: 'rgba(15, 107, 92, 0.88)' }}
+          />
         </div>
 
         {/* Content container */}
@@ -45,7 +48,7 @@ export default function AuthLayout({
               'UPI se pay karke password lo, full notes download karo.',
             ].map((step, idx) => (
               <div key={idx} className="flex items-center gap-3.5 text-[14.5px] leading-snug text-white">
-                <span className="w-[22px] h-[22px] rounded-full bg-white/16 flex items-center justify-center font-mono text-[12px] font-bold text-white shrink-0">
+                <span className="w-[22px] h-[22px] rounded-full bg-white/20 flex items-center justify-center font-mono text-[12px] font-bold text-white shrink-0">
                   {idx + 1}
                 </span>
                 <span>{step}</span>
