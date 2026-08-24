@@ -172,7 +172,7 @@ export function AuthForm({ initialMode }: AuthFormProps) {
         <Button
           type="submit"
           variant="primary"
-          className="w-full"
+          className="w-full font-bold"
           disabled={loading}
         >
           {loading
@@ -181,6 +181,24 @@ export function AuthForm({ initialMode }: AuthFormProps) {
             ? 'Account banao'
             : 'Login karo'}
         </Button>
+
+        {/* Demo Quick Fill for Instant Testing */}
+        <div className="pt-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setPhone('9876543210');
+              setPassword('123456');
+              if (mode === 'register') setName('Rahul Sharma');
+              toast('Demo credentials fill ho gaye! Ab Login karo click karein.');
+            }}
+            className="w-full text-xs text-brand font-mono border-dashed border-brand/30 hover:bg-brand-soft"
+          >
+            ⚡ Quick Fill Demo: 9876543210 / 123456
+          </Button>
+        </div>
       </form>
 
       {/* Footer / Password help */}

@@ -109,7 +109,16 @@ export async function loginAction(formData: FormData): Promise<AuthResult> {
   const email = phoneToEmail(phone);
   const supabase = createClient();
 
-  try {
+    // If Supabase is in placeholder/mock mode locally, log in directly:
+    const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder');
+    if (isMock) {
+      cookies().set('vldd_local_user', JSON.stringify({ name: 'Rahul Sharma (Student)', phone, role: 'student' }), {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      return { success: true };
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -121,10 +130,9 @@ export async function loginAction(formData: FormData): Promise<AuthResult> {
 
     return { success: true };
   } catch (err: unknown) {
-    // If Supabase is in demo/placeholder mode locally:
     const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder');
     if (isMock) {
-      cookies().set('vldd_local_user', JSON.stringify({ name: 'Student', phone, role: 'student' }), {
+      cookies().set('vldd_local_user', JSON.stringify({ name: 'Rahul Sharma (Student)', phone, role: 'student' }), {
         path: '/',
         maxAge: 60 * 60 * 24 * 7,
       });
