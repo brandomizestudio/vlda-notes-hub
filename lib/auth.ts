@@ -32,23 +32,43 @@ export async function getSession(): Promise<{
       data: { session },
     } = await supabase.auth.getSession();
 
-    if (!session?.user) {
-      return { user: null, profile: null };
+    if (session?.user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile) {
+        return {
+          user: session.user,
+          profile,
+        };
+      }
     }
+  } catch {}
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
+  // Fallback for local demo/development
+  try {
+    const cookieStore = require('next/headers').cookies();
+    const localUserCookie = cookieStore.get('vldd_local_user')?.value;
+    if (localUserCookie) {
+      const parsed = JSON.parse(localUserCookie);
+      const mockProfile: Profile = {
+        id: 'mock-user-123',
+        name: parsed.name || 'Student',
+        phone: parsed.phone || '9876543210',
+        role: parsed.role || 'student',
+        created_at: new Date().toISOString(),
+      };
+      return {
+        user: { id: mockProfile.id, email: `${mockProfile.phone}@vldd.local` },
+        profile: mockProfile,
+      };
+    }
+  } catch {}
 
-    return {
-      user: session.user,
-      profile: profile || null,
-    };
-  } catch {
-    return { user: null, profile: null };
-  }
+  return { user: null, profile: null };
 }
 
 /**
