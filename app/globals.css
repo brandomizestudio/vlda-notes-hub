@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ground:      #F3F6F1;   /* page background */
+  --card:        #FFFFFF;   /* card / panel surface */
+  --card-2:      #EDF1EA;   /* inset, tab track, table stripe */
+  --ink:         #12211C;   /* primary text */
+  --ink-2:       #41544C;   /* secondary text, labels */
+  --ink-3:       #76877F;   /* meta, captions, placeholders */
+  --line:        #DCE3DA;   /* hairline borders */
+  --line-2:      #C8D2C5;   /* input borders */
+  --brand:       #0F6B5C;   /* deep veterinary green — logo, free badge, primary links */
+  --brand-soft:  #E2EFEB;   /* brand tint background */
+  --accent:      #E39A12;   /* marigold — primary CTA, price, admin active tab */
+  --accent-ink:  #3D2A05;   /* text on accent */
+  --lock:        #B23F2C;   /* locked / paid / error */
+  --lock-soft:   #F8E7E3;
+  --ok:          #0F6B5C;   /* success (same family as brand) */
+  --shadow-card: 0 1px 2px rgba(18, 33, 28, 0.06), 0 8px 24px -12px rgba(18, 33, 28, 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0C1512;
+    --card:        #15211D;
+    --card-2:      #1D2C27;
+    --ink:         #E7EEE9;
+    --ink-2:       #A9BAB2;
+    --ink-3:       #7C8D85;
+    --line:        #26352F;
+    --line-2:      #334741;
+    --brand:       #4CBBA5;
+    --brand-soft:  #13312B;
+    --accent:      #F0AE33;
+    --accent-ink:  #2A1D04;
+    --lock:        #E4785F;
+    --lock-soft:   #33201B;
+    --ok:          #4CBBA5;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -14px rgba(0, 0, 0, 0.7);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground:      #0C1512;
+  --card:        #15211D;
+  --card-2:      #1D2C27;
+  --ink:         #E7EEE9;
+  --ink-2:       #A9BAB2;
+  --ink-3:       #7C8D85;
+  --line:        #26352F;
+  --line-2:      #334741;
+  --brand:       #4CBBA5;
+  --brand-soft:  #13312B;
+  --accent:      #F0AE33;
+  --accent-ink:  #2A1D04;
+  --lock:        #E4785F;
+  --lock-soft:   #33201B;
+  --ok:          #4CBBA5;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -14px rgba(0, 0, 0, 0.7);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body), 'Mukta', 'Noto Sans Devanagari', system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display), 'Bricolage Grotesque', 'Mukta', system-ui, sans-serif;
+  text-wrap: balance;
+  color: var(--ink);
+}
+
+p {
+  max-width: 65ch;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Custom password input styling */
+.input-password-mono {
+  font-family: var(--font-mono), 'IBM Plex Mono', monospace;
+  font-size: 17px;
+  letter-spacing: 0.18em;
+  text-align: center;
+  background-color: var(--ground);
+  padding: 13px;
+}
+
+/* Eyebrow label */
+.eyebrow {
+  font-family: var(--font-mono), 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
