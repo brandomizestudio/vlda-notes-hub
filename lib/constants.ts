@@ -6,6 +6,12 @@ export interface BatchDef {
   bannerImage: string;
 }
 
+// Special UUID used as note_id in unlocks table to track bundle purchase
+export const BUNDLE_ID = '00000000-0000-0000-0000-000000000099';
+
+// Bundle price in paise (₹99)
+export const BUNDLE_PRICE_PAISE = 9900;
+
 export const BATCHES: BatchDef[] = [
   {
     id: 'entrance',
@@ -38,7 +44,8 @@ export const SECTION_COPY = {
 
 export const FALLBACK_SETTINGS = {
   upi_id: 'vlddnotes@upi',
-  whatsapp_number: '919876543210',
+  whatsapp_number: '919857041222',
   site_notice: 'Naye batch ke notes upload ho rahe hain! Kisi bhi sahayata ke liye WhatsApp karein.',
   site_notice_active: 'true',
+  bundle_password: 'VLDD99',
 };

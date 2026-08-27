@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { NotePublic, Batch } from '@/types/database';
-import { BATCHES, FALLBACK_SETTINGS } from '@/lib/constants';
+import { BATCHES, FALLBACK_SETTINGS, BUNDLE_ID } from '@/lib/constants';
 
 const isSupabaseConfigured = Boolean(
   process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -51,7 +51,7 @@ const FALLBACK_NOTES: (NotePublic & { pdf_password?: string; file_path?: string 
     language: 'Hindi',
     pages: 190,
     file_size: 40370176,
-    price_paise: 29900,
+    price_paise: 9900,
     sort_order: 3,
     is_published: true,
     created_at: '2026-08-20T12:00:00Z',
@@ -67,7 +67,7 @@ const FALLBACK_NOTES: (NotePublic & { pdf_password?: string; file_path?: string 
     language: 'Hindi',
     pages: 240,
     file_size: 48444211,
-    price_paise: 34900,
+    price_paise: 9900,
     sort_order: 4,
     is_published: true,
     created_at: '2026-08-20T13:00:00Z',
@@ -113,7 +113,7 @@ const FALLBACK_NOTES: (NotePublic & { pdf_password?: string; file_path?: string 
     language: 'Hindi',
     pages: 320,
     file_size: 65116569,
-    price_paise: 49900,
+    price_paise: 9900,
     sort_order: 3,
     is_published: true,
     created_at: '2026-08-21T12:00:00Z',
@@ -129,7 +129,7 @@ const FALLBACK_NOTES: (NotePublic & { pdf_password?: string; file_path?: string 
     language: 'Hindi',
     pages: 380,
     file_size: 78433484,
-    price_paise: 49900,
+    price_paise: 9900,
     sort_order: 4,
     is_published: true,
     created_at: '2026-08-21T13:00:00Z',
@@ -218,3 +218,51 @@ export const getSettings = cache(async (): Promise<Record<string, string>> => {
 
   return FALLBACK_SETTINGS;
 });
+
+/** Check if user has unlocked the bundle */
+export const getBundleUnlockStatus = cache(async (userId: string): Promise<boolean> => {
+  if (isSupabaseConfigured) {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('unlocks')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('note_id', BUNDLE_ID)
+        .maybeSingle();
+      return !!data;
+    } catch {}
+  }
+
+  // Demo mode: check cookie
+  try {
+    const cookieStore = require('next/headers').cookies();
+    const unlockedJson = cookieStore.get('vldd_unlocked_notes')?.value;
+    if (unlockedJson) {
+      const list: string[] = JSON.parse(unlockedJson);
+      return list.includes(BUNDLE_ID);
+    }
+  } catch {}
+
+  return false;
+});
+
+/** Get all paid notes (for bundle ZIP) */
+export const getAllPaidNotes = cache(async (): Promise<NotePublic[]> => {
+  if (isSupabaseConfigured) {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('notes_public')
+        .select('*')
+        .eq('tier', 'paid')
+        .eq('is_published', true)
+        .order('batch_id')
+        .order('sort_order');
+      if (data && (data as any[]).length > 0) return data as NotePublic[];
+    } catch {}
+  }
+
+  return FALLBACK_NOTES.filter((n) => n.tier === 'paid' && n.is_published);
+});
+

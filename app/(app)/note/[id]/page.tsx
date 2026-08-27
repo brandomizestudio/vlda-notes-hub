@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
-import { getNoteById, getBatches, getUserUnlocks, getSettings } from '@/lib/data';
+import { getNoteById, getBatches, getBundleUnlockStatus, getSettings } from '@/lib/data';
 import { NoteView } from './note-view';
 
 interface NotePageProps {
@@ -31,17 +31,21 @@ export default async function NotePage({ params }: NotePageProps) {
     notFound();
   }
 
-  const batches = await getBatches();
+  const [batches, isBundleUnlocked, settings] = await Promise.all([
+    getBatches(),
+    getBundleUnlockStatus(profile.id),
+    getSettings(),
+  ]);
+
   const batch = batches.find((b) => b.id === note.batch_id) || batches[0];
-  const userUnlocks = await getUserUnlocks(profile.id);
-  const isUnlocked = userUnlocks.includes(note.id);
-  const settings = await getSettings();
+  const isFree = note.tier === 'free';
 
   return (
     <NoteView
       note={note}
       batch={batch}
-      isUnlocked={isUnlocked}
+      isUnlocked={isFree || isBundleUnlocked}
+      isBundleUnlocked={isBundleUnlocked}
       upiId={settings.upi_id}
       whatsappNumber={settings.whatsapp_number}
     />

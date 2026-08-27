@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Link from 'next/link';
 import { Lock, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatRupees, formatFileSize } from '@/lib/format';
@@ -28,11 +29,36 @@ export function NoteCard({
   isUnlocked = false,
   pricePaise = 0,
   onActionClick,
+  actionHref,
   className,
 }: NoteCardProps) {
   const isFree = tier === 'free';
   const isLocked = !isFree && !isUnlocked;
   const isPaidUnlocked = !isFree && isUnlocked;
+
+  const handleClick = (e?: React.MouseEvent) => {
+    if (onActionClick) {
+      e?.preventDefault();
+      onActionClick(id);
+    }
+  };
+
+  const ActionButton = ({ children, variant }: { children: React.ReactNode; variant: 'brand' | 'primary' }) => {
+    if (actionHref && !onActionClick) {
+      return (
+        <Link href={actionHref}>
+          <Button variant={variant} size="sm" className={variant === 'primary' ? 'gap-1.5' : ''}>
+            {children}
+          </Button>
+        </Link>
+      );
+    }
+    return (
+      <Button variant={variant} size="sm" className={variant === 'primary' ? 'gap-1.5' : ''} onClick={() => onActionClick?.(id)}>
+        {children}
+      </Button>
+    );
+  };
 
   return (
     <div
@@ -88,33 +114,20 @@ export function NoteCard({
           {/* Action button */}
           <div>
             {isFree && (
-              <Button
-                variant="brand"
-                size="sm"
-                onClick={() => onActionClick?.(id)}
-              >
+              <ActionButton variant="brand">
                 PDF kholo
-              </Button>
+              </ActionButton>
             )}
             {isLocked && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => onActionClick?.(id)}
-                className="gap-1.5"
-              >
+              <ActionButton variant="primary">
                 <Lock className="w-3.5 h-3.5" />
                 Unlock karo
-              </Button>
+              </ActionButton>
             )}
             {isPaidUnlocked && (
-              <Button
-                variant="brand"
-                size="sm"
-                onClick={() => onActionClick?.(id)}
-              >
+              <ActionButton variant="brand">
                 Download karo
-              </Button>
+              </ActionButton>
             )}
           </div>
         </div>

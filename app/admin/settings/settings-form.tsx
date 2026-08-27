@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/toaster';
-import { Save } from 'lucide-react';
+import { Save, Key } from 'lucide-react';
 import { FALLBACK_SETTINGS } from '@/lib/constants';
 
 interface SettingsFormProps {
@@ -21,6 +21,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   );
   const [isNoticeActive, setIsNoticeActive] = React.useState(
     initialSettings.site_notice_active === 'true'
+  );
+  const [bundlePassword, setBundlePassword] = React.useState(
+    (initialSettings.bundle_password || FALLBACK_SETTINGS.bundle_password).toUpperCase()
   );
   const [loading, setLoading] = React.useState(false);
 
@@ -55,6 +58,26 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           onChange={(e) => setWhatsappNumber(e.target.value)}
           required
           helperText="Students ko password bhejne aur help queries ke liye ye number use hoga"
+        />
+      </div>
+
+      {/* Bundle Password */}
+      <div className="p-6 rounded-[16px] border border-brand/30 bg-brand-soft shadow-card space-y-4">
+        <div className="flex items-center gap-2">
+          <Key className="w-4 h-4 text-brand" />
+          <div className="eyebrow text-brand">BUNDLE PASSWORD</div>
+        </div>
+        <p className="text-[13px] text-ink-2">
+          Ye password admin approve karne ke baad student ko WhatsApp par bheja jaata hai. Student is password ko enter karke ₹99 bundle unlock kar sakta hai.
+        </p>
+        <Input
+          label="Bundle Password (UPPERCASE)"
+          placeholder="VLDD99"
+          value={bundlePassword}
+          onChange={(e) => setBundlePassword(e.target.value.toUpperCase())}
+          required
+          helperText="Sirf letters aur numbers — 4 se 16 characters. Isko WhatsApp message me auto-include kiya jaata hai."
+          isPasswordMono
         />
       </div>
 

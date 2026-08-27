@@ -3,18 +3,20 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Download, FileText, Lock, ShieldCheck, Check } from 'lucide-react';
+import { ArrowLeft, Download, FileText, Lock, ShieldCheck, Package, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PaymentPanel } from '@/components/payment-panel';
+import { BundlePanel } from '@/components/bundle-panel';
 import { NotePublic, Batch } from '@/types/database';
 import { formatFileSize, formatRupees } from '@/lib/format';
 import { toast } from '@/components/ui/toaster';
+import { BUNDLE_PRICE_PAISE } from '@/lib/constants';
 
 interface NoteViewProps {
   note: NotePublic;
   batch: Batch;
-  isUnlocked: boolean;
+  isUnlocked: boolean;      // true if this specific free note or bundle is unlocked
+  isBundleUnlocked: boolean;
   upiId?: string;
   whatsappNumber?: string;
 }
@@ -23,21 +25,27 @@ export function NoteView({
   note,
   batch,
   isUnlocked: initialUnlocked,
+  isBundleUnlocked: initialBundleUnlocked,
   upiId,
   whatsappNumber,
 }: NoteViewProps) {
   const router = useRouter();
-  const [isUnlocked, setIsUnlocked] = React.useState(initialUnlocked);
   const isFree = note.tier === 'free';
-  const canAccess = isFree || isUnlocked;
+  const [isBundleUnlocked, setIsBundleUnlocked] = React.useState(initialBundleUnlocked);
+  const canAccess = isFree || isBundleUnlocked;
 
   const handleDownload = () => {
-    toast('PDF download shuru ho rahi hai...');
-    window.location.href = `/api/download/${note.id}`;
+    if (isFree) {
+      toast('PDF download shuru ho rahi hai...');
+      window.location.href = `/api/download/${note.id}`;
+    } else {
+      toast('Bundle ZIP download shuru ho rahi hai...');
+      window.location.href = '/api/bundle-download';
+    }
   };
 
-  const handleUnlockedSuccess = () => {
-    setIsUnlocked(true);
+  const handleBundleUnlocked = () => {
+    setIsBundleUnlocked(true);
     router.refresh();
   };
 
@@ -54,13 +62,13 @@ export function NoteView({
         </Link>
       </div>
 
-      {/* Main Grid: Details on Left, Action / Payment on Right */}
+      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
         {/* Left Column: Note Details */}
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={isFree ? 'free' : isUnlocked ? 'ok' : 'paid'}>
-              {isFree ? 'Free Trial' : isUnlocked ? 'Unlocked' : 'Paid Full Notes'}
+            <Badge variant={isFree ? 'free' : isBundleUnlocked ? 'ok' : 'paid'}>
+              {isFree ? 'Free Trial' : isBundleUnlocked ? 'Bundle Unlocked' : 'Bundle — ₹99'}
             </Badge>
             {note.subject && (
               <span className="text-[12px] font-mono px-2 py-0.5 rounded bg-card-2 text-ink-2 font-medium">
@@ -84,7 +92,7 @@ export function NoteView({
               <>
                 <span>·</span>
                 <span className="font-mono font-bold text-ink text-[14.5px]">
-                  {formatRupees(note.price_paise)}
+                  Bundle ₹{Math.round(BUNDLE_PRICE_PAISE / 100)}
                 </span>
               </>
             )}
@@ -100,7 +108,7 @@ export function NoteView({
             </div>
           )}
 
-          {/* Key Features / Assurances */}
+          {/* Assurance card */}
           <div className="p-4 rounded-[12px] bg-card border border-line space-y-2.5">
             <div className="flex items-center gap-2 text-[13.5px] font-semibold text-ink">
               <ShieldCheck className="w-4 h-4 text-brand shrink-0" />
@@ -110,12 +118,25 @@ export function NoteView({
               Sabhi diagrams labelled hain aur questions pichle exams ke pattern par based hain.
             </div>
           </div>
+
+          {/* Bundle info for paid notes */}
+          {!isFree && (
+            <div className="p-4 rounded-[12px] bg-ground border border-line space-y-2">
+              <div className="flex items-center gap-2 text-[13.5px] font-semibold text-ink">
+                <Package className="w-4 h-4 text-accent shrink-0" />
+                <span>Ye note bundle me hai</span>
+              </div>
+              <div className="text-[13px] text-ink-3">
+                Sirf ₹{Math.round(BUNDLE_PRICE_PAISE / 100)} me poori batch ki saari notes ek ZIP me milti hain — individual note buy karne ki zaroorat nahi.
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right Column: PDF Preview / Payment Panel */}
+        {/* Right Column: Action / Download / Bundle Panel */}
         <div className="p-6 rounded-[16px] border border-line bg-card shadow-card">
           {canAccess ? (
-            /* Unlocked / Free Note Action */
+            /* Unlocked / Free Note — Download */
             <div className="space-y-6 text-center sm:text-left">
               <div className="flex items-center justify-between border-b border-line pb-4">
                 <div className="flex items-center gap-2">
@@ -129,7 +150,7 @@ export function NoteView({
                 </span>
               </div>
 
-              {/* On-site Preview Box */}
+              {/* Preview box */}
               <div className="w-full aspect-[4/5] rounded-[10px] bg-ground border border-line-2 flex flex-col items-center justify-center p-6 text-center space-y-3">
                 <div className="w-14 h-14 rounded-full bg-brand-soft flex items-center justify-center text-brand">
                   <FileText className="w-7 h-7" />
@@ -138,32 +159,31 @@ export function NoteView({
                   {note.title}
                 </div>
                 <div className="text-[13px] text-ink-3">
-                  Watermarked PDF ready for download
+                  {isFree ? 'Watermarked PDF ready' : 'Bundle ZIP me shamil hai'}
                 </div>
               </div>
 
-              {/* Download Button */}
               <Button
                 variant="brand"
                 className="w-full gap-2 text-[15px] font-bold"
                 onClick={handleDownload}
               >
                 <Download className="w-4 h-4" />
-                PDF download karo
+                {isFree ? 'PDF download karo' : 'Complete Bundle ZIP Download Karo'}
               </Button>
 
-              {/* Helper text */}
               <p className="text-[13px] leading-[1.5] text-ink-3 text-center">
-                Har page par aapka naam aur number watermark me hai — PDF kisi ko forward mat karna.
+                {isFree
+                  ? 'Har page par aapka naam aur number watermark me hai — share mat karna.'
+                  : 'Saari bundle files ZIP me hongi, har PDF me aapka naam watermark me.'}
               </p>
             </div>
           ) : (
-            /* Locked Note: Payment Panel */
-            <PaymentPanel
-              note={note}
+            /* Locked paid note → Bundle Panel */
+            <BundlePanel
               upiId={upiId}
               whatsappNumber={whatsappNumber}
-              onUnlocked={handleUnlockedSuccess}
+              onUnlocked={handleBundleUnlocked}
             />
           )}
         </div>

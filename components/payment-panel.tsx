@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import QRCode from 'qrcode';
 import { Copy, ExternalLink, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,6 @@ export function PaymentPanel({
   whatsappNumber = FALLBACK_SETTINGS.whatsapp_number,
   onUnlocked,
 }: PaymentPanelProps) {
-  const [qrDataUrl, setQrDataUrl] = React.useState<string>('');
   const [utr, setUtr] = React.useState('');
   const [utrSubmitted, setUtrSubmitted] = React.useState(false);
   const [utrTime, setUtrTime] = React.useState<string>('');
@@ -36,20 +34,6 @@ export function PaymentPanel({
   const amountRupees = Math.round(note.price_paise / 100);
   const noteShortId = note.id.substring(0, 8);
   const upiDeepLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=VLDD%20Notes%20Hub&am=${amountRupees}&cu=INR&tn=${noteShortId}`;
-
-  // Generate QR code data URL
-  React.useEffect(() => {
-    QRCode.toDataURL(upiDeepLink, {
-      margin: 1,
-      width: 200,
-      color: {
-        dark: '#12211C',
-        light: '#FFFFFF',
-      },
-    })
-      .then((url) => setQrDataUrl(url))
-      .catch(() => {});
-  }, [upiDeepLink]);
 
   const handleCopyUpi = () => {
     navigator.clipboard.writeText(upiId);
@@ -132,14 +116,19 @@ export function PaymentPanel({
 
       {/* Payment Box */}
       <div className="p-[14px] rounded-[12px] bg-card-2 border border-line flex flex-col sm:flex-row items-center gap-4">
-        {/* QR Code */}
-        <div className="w-[104px] h-[104px] rounded-[8px] bg-white p-1 border border-line-2 flex items-center justify-center shrink-0">
-          {qrDataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={qrDataUrl} alt="UPI QR Code" className="w-full h-full object-contain" />
-          ) : (
-            <div className="text-[11px] font-mono text-ink-3">QR loading...</div>
-          )}
+        {/* QR Code — Static Google Pay QR */}
+        <div className="shrink-0 relative flex flex-col items-center gap-1.5">
+          <div className="w-[140px] h-[140px] rounded-[10px] bg-white p-2 border border-line-2 flex items-center justify-center overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/img/gpay-qr.png"
+              alt="Google Pay QR"
+              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+            />
+          </div>
+          <span className="font-mono text-[11px] font-bold text-brand bg-brand-soft px-2 py-0.5 rounded-full border border-brand/20">
+            ₹{amountRupees}
+          </span>
         </div>
 
         {/* Amount & UPI ID */}

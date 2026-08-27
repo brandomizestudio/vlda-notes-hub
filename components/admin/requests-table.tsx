@@ -14,7 +14,8 @@ import {
 } from '@/components/ui/table';
 import { toast } from '@/components/ui/toaster';
 import { formatRupees } from '@/lib/format';
-import { MessageSquare, Check, X, Search } from 'lucide-react';
+import { MessageSquare, X, Search, Package } from 'lucide-react';
+import { BUNDLE_ID, BUNDLE_PRICE_PAISE, FALLBACK_SETTINGS } from '@/lib/constants';
 
 interface PaymentRequestItem {
   id: string;
@@ -22,49 +23,52 @@ interface PaymentRequestItem {
   phone: string;
   noteId: string;
   noteTitle: string;
-  pdfPassword: string;
   utr: string;
   amountPaise: number;
   time: string;
   status: 'pending' | 'approved' | 'rejected';
+  isBundle: boolean;
 }
+
+// Demo bundle password — in production comes from settings
+const DEMO_BUNDLE_PASSWORD = FALLBACK_SETTINGS.bundle_password;
 
 const INITIAL_REQUESTS: PaymentRequestItem[] = [
   {
     id: 'req-1',
     studentName: 'Vikas Godara',
     phone: '9812345678',
-    noteId: '11111111-1111-1111-1111-111111111103',
-    noteTitle: 'Entrance Complete Notes (Biology + Chemistry + GK)',
-    pdfPassword: 'ENTRANCE2026',
+    noteId: BUNDLE_ID,
+    noteTitle: 'Complete Bundle (Entrance + 1st & 2nd Year)',
     utr: '428901928312',
-    amountPaise: 29900,
+    amountPaise: BUNDLE_PRICE_PAISE,
     time: 'Aaj, 04:30 PM',
     status: 'pending',
+    isBundle: true,
   },
   {
     id: 'req-2',
     studentName: 'Amit Kumar',
     phone: '9416289012',
-    noteId: '22222222-2222-2222-2222-222222222203',
-    noteTitle: '1st Year Complete Notes (Anatomy + Physiology)',
-    pdfPassword: 'YEAR1FULL',
+    noteId: BUNDLE_ID,
+    noteTitle: 'Complete Bundle (Entrance + 1st & 2nd Year)',
     utr: '428819283719',
-    amountPaise: 49900,
+    amountPaise: BUNDLE_PRICE_PAISE,
     time: 'Aaj, 02:15 PM',
     status: 'pending',
+    isBundle: true,
   },
   {
     id: 'req-3',
     studentName: 'Pooja Rani',
     phone: '9467812345',
-    noteId: '11111111-1111-1111-1111-111111111104',
-    noteTitle: 'Entrance 10-Year Solved Question Papers',
-    pdfPassword: 'MOCKVLDD',
+    noteId: BUNDLE_ID,
+    noteTitle: 'Complete Bundle (Entrance + 1st & 2nd Year)',
     utr: '428710293819',
-    amountPaise: 34900,
+    amountPaise: BUNDLE_PRICE_PAISE,
     time: 'Kal, 07:10 PM',
     status: 'approved',
+    isBundle: true,
   },
 ];
 
@@ -72,6 +76,8 @@ export function RequestsTable() {
   const [requests, setRequests] = React.useState<PaymentRequestItem[]>(INITIAL_REQUESTS);
   const [filter, setFilter] = React.useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
   const [search, setSearch] = React.useState('');
+  // In production, fetch bundle password from /api/admin/settings or pass as prop
+  const bundlePassword = DEMO_BUNDLE_PASSWORD;
 
   const filteredRequests = requests.filter((req) => {
     if (filter !== 'all' && req.status !== filter) return false;
@@ -85,21 +91,32 @@ export function RequestsTable() {
     );
   });
 
-  const handleApprove = (req: PaymentRequestItem) => {
-    // 1. Update status
+  const handleApprove = async (req: PaymentRequestItem) => {
+    // 1. Update local status
     setRequests((prev) =>
       prev.map((r) => (r.id === req.id ? { ...r, status: 'approved' } : r))
     );
 
-    // 2. Prepare WhatsApp message
+    // 2. Compose WhatsApp message with bundle password
     const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://vlddnotes.com';
-    const message = `Namaste ${req.studentName}, aapka payment mil gaya.\nNote: ${req.noteTitle}\nPDF password: ${req.pdfPassword}\nWebsite par ye password daal ke PDF kholo: ${siteUrl}/note/${req.noteId}`;
+    const message = req.isBundle
+      ? `Namaste ${req.studentName}! 🎉\n\nAapka ₹${Math.round(req.amountPaise / 100)} payment confirm ho gaya.\n\n📦 *Complete Bundle Password:* ${bundlePassword}\n\n🌐 Website par jao aur bundle unlock karo:\n${siteUrl}/bundle\n\nPassword daalte hi saari notes ki ZIP download ho jaayegi.\n\nHar PDF me aapka naam watermark me hai — kisi ko share mat karna. 🙏`
+      : `Namaste ${req.studentName}, aapka payment confirm ho gaya.\nNote: ${req.noteTitle}\nPassword: ${bundlePassword}\nWebsite: ${siteUrl}`;
 
     navigator.clipboard.writeText(message);
-    toast('Password message copy ho gaya aur WhatsApp khul raha hai!');
+    toast('Password message copy ho gaya — WhatsApp khul raha hai!');
 
     const waUrl = `https://wa.me/91${req.phone}?text=${encodeURIComponent(message)}`;
     window.open(waUrl, '_blank');
+
+    // 3. If Supabase configured, mark bundle unlock in DB
+    try {
+      await fetch('/api/admin/approve-bundle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: req.id, userId: req.phone }),
+      });
+    } catch {}
   };
 
   const handleReject = (req: PaymentRequestItem) => {
@@ -111,6 +128,16 @@ export function RequestsTable() {
 
   return (
     <div className="space-y-4">
+      {/* Bundle password display */}
+      <div className="p-3.5 rounded-[12px] bg-brand-soft border border-brand/20 flex items-center gap-3">
+        <Package className="w-4 h-4 text-brand shrink-0" />
+        <div className="text-[13.5px] text-ink">
+          <span className="font-medium">Bundle Password:</span>{' '}
+          <span className="font-mono font-bold text-brand text-[15px]">{bundlePassword}</span>
+          <span className="text-ink-3 ml-2 text-[12px]">(Settings me badlo)</span>
+        </div>
+      </div>
+
       {/* Filter Row + Search */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 p-1 rounded-[10px] bg-card-2 border border-line-2 overflow-x-auto">
@@ -148,7 +175,7 @@ export function RequestsTable() {
           <TableRow>
             <TableHead>STUDENT</TableHead>
             <TableHead>NUMBER</TableHead>
-            <TableHead className="wrap">NOTE &amp; PASSWORD</TableHead>
+            <TableHead className="wrap">BUNDLE / NOTE</TableHead>
             <TableHead>UTR NUMBER</TableHead>
             <TableHead>AMOUNT</TableHead>
             <TableHead>TIME</TableHead>
@@ -173,9 +200,14 @@ export function RequestsTable() {
                   +91 {req.phone}
                 </TableCell>
                 <TableCell className="wrap">
-                  <div className="font-medium text-ink">{req.noteTitle}</div>
+                  <div className="flex items-center gap-1.5">
+                    {req.isBundle && (
+                      <Package className="w-3.5 h-3.5 text-brand shrink-0" />
+                    )}
+                    <div className="font-medium text-ink text-[13px]">{req.noteTitle}</div>
+                  </div>
                   <div className="font-mono text-xs text-brand font-bold mt-0.5">
-                    Pass: {req.pdfPassword}
+                    Pass: {bundlePassword}
                   </div>
                 </TableCell>
                 <TableCell className="font-mono text-xs font-semibold text-ink">

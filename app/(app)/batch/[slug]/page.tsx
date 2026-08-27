@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
-import { getBatches, getNotesByBatch, getUserUnlocks } from '@/lib/data';
+import { getBatches, getNotesByBatch, getBundleUnlockStatus } from '@/lib/data';
 import { BatchView } from './batch-view';
 
 interface BatchPageProps {
@@ -37,10 +37,10 @@ export default async function BatchPage({ params }: BatchPageProps) {
     notFound();
   }
 
-  // Parallelize notes query and unlocks query
-  const [allNotes, unlockedNoteIds] = await Promise.all([
+  // Parallelize notes + bundle unlock status
+  const [allNotes, isBundleUnlocked] = await Promise.all([
     getNotesByBatch(batch.id),
-    getUserUnlocks(profile.id),
+    getBundleUnlockStatus(profile.id),
   ]);
 
   const freeNotes = allNotes.filter((n) => n.tier === 'free');
@@ -51,7 +51,7 @@ export default async function BatchPage({ params }: BatchPageProps) {
       batch={batch}
       freeNotes={freeNotes}
       paidNotes={paidNotes}
-      unlockedNoteIds={unlockedNoteIds}
+      isBundleUnlocked={isBundleUnlocked}
     />
   );
 }

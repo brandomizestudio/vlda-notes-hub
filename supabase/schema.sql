@@ -43,19 +43,22 @@ create table if not exists public.notes (
 );
 
 -- 4. Unlocks Table
+-- note_id is text (not FK) so it can store the special BUNDLE_ID
+-- as well as individual note UUIDs.
 create table if not exists public.unlocks (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references public.profiles(id) on delete cascade,
-  note_id     uuid not null references public.notes(id) on delete cascade,
+  note_id     text not null,   -- UUID string; may be BUNDLE_ID or a real note id
   created_at  timestamptz not null default now(),
   unique (user_id, note_id)
 );
 
 -- 5. Payment Requests Table
+-- note_id is text (same reason as above)
 create table if not exists public.payment_requests (
   id           uuid primary key default gen_random_uuid(),
   user_id      uuid not null references public.profiles(id) on delete cascade,
-  note_id      uuid not null references public.notes(id) on delete cascade,
+  note_id      text not null,  -- UUID string; may be BUNDLE_ID
   utr          text not null,
   amount_paise int not null,
   status       text not null default 'pending' check (status in ('pending','approved','rejected')),
@@ -126,3 +129,12 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- 11. Default Settings (upsert so re-running is safe)
+insert into public.settings (key, value) values
+  ('upi_id',             'vlddnotes@upi'),
+  ('whatsapp_number',    '919857041222'),
+  ('site_notice',        'Naye batch ke notes upload ho rahe hain!'),
+  ('site_notice_active', 'true'),
+  ('bundle_password',    'VLDD99')
+on conflict (key) do nothing;

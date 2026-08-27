@@ -66,7 +66,7 @@ export function AppHeader({
                 VLDD Notes Hub
               </div>
               <div className="text-[11.5px] text-ink-3 font-mono truncate max-w-[200px] sm:max-w-none">
-                {studentName} · {unlockedCount} {unlockedCount === 1 ? 'note' : 'notes'} unlocked
+                {unlockedCount} {unlockedCount === 1 ? 'note' : 'notes'} unlocked
               </div>
             </div>
           </Link>
@@ -126,7 +126,7 @@ export function AppHeader({
         {mobileMenuOpen && (
           <div className="sm:hidden border-t border-line bg-card p-4 space-y-3 shadow-lg">
             <div className="text-[13px] text-ink-2 font-mono pb-1 border-b border-line">
-              Namaste, <strong className="text-ink">{studentName}</strong>
+              Namaste, <strong className="text-ink">Student</strong>
             </div>
             <Link
               href="/my-notes"

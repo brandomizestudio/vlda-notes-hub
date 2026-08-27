@@ -77,7 +77,7 @@ values
     190,
     'entrance/vldd_entrance_complete.pdf',
     40370176,
-    29900, -- ₹299
+    9900, -- ₹99
     'ENTRANCE2026',
     3,
     true
@@ -93,7 +93,7 @@ values
     240,
     'entrance/vldd_entrance_solved_papers.pdf',
     48444211,
-    34900, -- ₹349
+    9900, -- ₹99
     'MOCKVLDD',
     4,
     true
@@ -144,7 +144,7 @@ values
     320,
     'year/vldd_1st_year_complete.pdf',
     65116569,
-    49900, -- ₹499
+    9900, -- ₹99
     'YEAR1FULL',
     3,
     true
@@ -160,7 +160,7 @@ values
     380,
     'year/vldd_2nd_year_complete.pdf',
     78433484,
-    49900, -- ₹499
+    9900, -- ₹99
     'YEAR2FULL',
     4,
     true
@@ -185,7 +185,7 @@ set
 insert into public.settings (key, value)
 values
   ('upi_id', 'vlddnotes@upi'),
-  ('whatsapp_number', '919876543210'),
+  ('whatsapp_number', '919857041222'),
   ('site_notice', 'Naye batch ke notes upload ho rahe hain! Kisi bhi sahayata ke liye WhatsApp karein.'),
   ('site_notice_active', 'true')
 on conflict (key) do update
