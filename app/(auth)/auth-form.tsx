@@ -66,8 +66,7 @@ export function AuthForm({ initialMode }: AuthFormProps) {
         setLoading(false);
       } else {
         toast(mode === 'register' ? 'Account ban gaya! Welcome.' : 'Login successful!');
-        router.push('/batch/entrance');
-        router.refresh();
+        window.location.href = '/batch/entrance';
       }
     } catch {
       setError('Internet slow lag raha hai. Ek baar aur try karo.');

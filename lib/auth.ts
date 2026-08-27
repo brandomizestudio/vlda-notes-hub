@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { redirect, notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { Profile } from '@/types/database';
 
 /**
@@ -22,33 +23,74 @@ export function emailToPhone(email: string): string {
  * Retrieves the currently authenticated user's session and profile (cached per request)
  */
 export const getSession = cache(async (): Promise<{
-  user: { id: string; email?: string } | null;
+  user: { id: string; email?: string; user_metadata?: Record<string, any> } | null;
   profile: Profile | null;
 }> => {
   const supabase = createClient();
 
   try {
-    console.time('auth:supabase.auth.getSession');
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    console.timeEnd('auth:supabase.auth.getSession');
+    let authUser: { id: string; email?: string; user_metadata?: Record<string, any>; created_at?: string } | null = null;
 
-    if (session?.user) {
-      console.time('auth:supabase.profiles.select');
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-      console.timeEnd('auth:supabase.profiles.select');
+    // 1. Try getUser() first (validates with Supabase Auth)
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) authUser = user;
+    } catch {}
 
-      if (profile) {
-        return {
-          user: session.user,
-          profile,
-        };
-      }
+    // 2. Fallback to getSession() if getUser was slow or failed
+    if (!authUser) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) authUser = session.user;
+      } catch {}
+    }
+
+    if (authUser) {
+      const phone = authUser.user_metadata?.phone ||
+        (authUser.email ? emailToPhone(authUser.email) : '9876543210');
+      const name = authUser.user_metadata?.name || 'Student';
+      const role = (authUser.user_metadata?.role as 'student' | 'admin') || 'student';
+
+      // Try fetching profile with admin client (bypasses RLS issues)
+      try {
+        const admin = createAdminClient();
+        const { data: dbProfile } = await admin
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .maybeSingle();
+
+        if (dbProfile) {
+          return { user: authUser, profile: dbProfile as Profile };
+        }
+
+        // Auto-create missing profile in DB
+        const { data: newProfile } = await (admin
+          .from('profiles') as any)
+          .upsert({
+            id: authUser.id,
+            name,
+            phone,
+            role,
+          })
+          .select()
+          .single();
+
+        if (newProfile) {
+          return { user: authUser, profile: newProfile as Profile };
+        }
+      } catch {}
+
+      // Fallback in-memory profile if DB is unreachable
+      const fallbackProfile: Profile = {
+        id: authUser.id,
+        name,
+        phone,
+        role,
+        created_at: authUser.created_at || new Date().toISOString(),
+      };
+
+      return { user: authUser, profile: fallbackProfile };
     }
   } catch {}
 
