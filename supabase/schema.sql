@@ -138,3 +138,84 @@ insert into public.settings (key, value) values
   ('site_notice_active', 'true'),
   ('bundle_password',    'VLDD99')
 on conflict (key) do nothing;
+
+-- 12. Seed Batches (upsert so re-running is safe)
+insert into public.batches (id, title, subtitle, sort_order, is_active) values
+  ('entrance', 'VLDD Entrance Exam', 'Physics, Chemistry, Biology aur General Aptitude ke syllabus-aligned complete notes.', 1, true),
+  ('year',     'VLDD 1st & 2nd Year', 'Diploma subjects ke topic-wise handwritten aur clear diagrams waale complete notes.', 2, true)
+on conflict (id) do nothing;
+
+-- =========================================================
+-- 13. ROW LEVEL SECURITY (RLS) POLICIES
+-- =========================================================
+
+-- Enable RLS on all tables
+alter table public.profiles          enable row level security;
+alter table public.batches           enable row level security;
+alter table public.notes             enable row level security;
+alter table public.unlocks           enable row level security;
+alter table public.payment_requests  enable row level security;
+alter table public.settings          enable row level security;
+alter table public.download_log      enable row level security;
+
+-- ── profiles ─────────────────────────────────────────────
+-- Users can read and update their own profile
+create policy "profiles: own read"   on public.profiles for select using (auth.uid() = id);
+create policy "profiles: own update" on public.profiles for update using (auth.uid() = id);
+create policy "profiles: insert own" on public.profiles for insert with check (auth.uid() = id);
+-- Admins can read all profiles
+create policy "profiles: admin read all" on public.profiles for select using (
+  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+);
+
+-- ── batches ──────────────────────────────────────────────
+-- Public read for active batches (even without login — for landing page)
+create policy "batches: public read" on public.batches for select using (is_active = true);
+-- Admin full access
+create policy "batches: admin all" on public.batches for all using (
+  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+);
+
+-- ── notes ────────────────────────────────────────────────
+-- Authenticated users can read published notes (via server with service_role for file_path)
+-- Server uses service_role key so this policy applies to anon client only
+create policy "notes: auth read published" on public.notes for select
+  using (is_published = true and auth.role() = 'authenticated');
+-- Admin full access
+create policy "notes: admin all" on public.notes for all using (
+  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+);
+
+-- ── notes_public view ─────────────────────────────────────
+-- The view inherits from notes table — no separate RLS needed
+
+-- ── unlocks ──────────────────────────────────────────────
+create policy "unlocks: own read"   on public.unlocks for select using (auth.uid() = user_id);
+create policy "unlocks: own insert" on public.unlocks for insert with check (auth.uid() = user_id);
+-- Admin read all
+create policy "unlocks: admin all" on public.unlocks for all using (
+  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+);
+
+-- ── payment_requests ─────────────────────────────────────
+create policy "payment_requests: own read"   on public.payment_requests for select using (auth.uid() = user_id);
+create policy "payment_requests: own insert" on public.payment_requests for insert with check (auth.uid() = user_id);
+-- Admin full access
+create policy "payment_requests: admin all" on public.payment_requests for all using (
+  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+);
+
+-- ── settings ─────────────────────────────────────────────
+-- Authenticated users can read settings (UPI ID, WhatsApp number etc.)
+create policy "settings: auth read" on public.settings for select using (auth.role() = 'authenticated');
+-- Admin can write
+create policy "settings: admin write" on public.settings for all using (
+  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+);
+
+-- ── download_log ─────────────────────────────────────────
+create policy "download_log: own insert" on public.download_log for insert with check (auth.uid() = user_id);
+create policy "download_log: admin read" on public.download_log for select using (
+  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+);
+
