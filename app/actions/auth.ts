@@ -49,32 +49,43 @@ export async function registerAction(formData: FormData): Promise<AuthResult> {
       email,
       password,
       options: {
-        data: {
-          name,
-          phone,
-          role: 'student',
-        },
+        data: { name, phone, role: 'student' },
+        // Skip email confirmation — phone-based auth
+        emailRedirectTo: undefined,
       },
     });
 
     if (error) {
-      if (
-        error.message.toLowerCase().includes('already registered') ||
-        error.message.toLowerCase().includes('user already exists')
-      ) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes('already registered') || msg.includes('user already exists') || msg.includes('already been registered')) {
         return { success: false, error: AUTH_ERRORS.ALREADY_REGISTERED };
       }
-      return { success: false, error: AUTH_ERRORS.WRONG_CREDENTIALS };
+      if (msg.includes('password') || msg.includes('weak')) {
+        return { success: false, error: 'Password kam se kam 6 characters ka hona chahiye.' };
+      }
+      console.error('Register error:', error.message);
+      return { success: false, error: `Registration fail: ${error.message}` };
     }
 
     if (!data.user) {
       return { success: false, error: AUTH_ERRORS.NETWORK_FAILURE };
     }
 
+    // If session exists (email confirmation disabled), user is logged in
+    if (data.session) {
+      return { success: true };
+    }
+
+    // Email confirmation is ON in Supabase — auto sign-in after signup
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) {
+      // Account created, but auto-login failed — user can login manually
+      return { success: true };
+    }
+
     return { success: true };
   } catch (err: unknown) {
-    // If Supabase is not connected (e.g. initial local preview without env vars),
-    // set a demo cookie so local preview works seamlessly.
+    // If Supabase is not connected, set a demo cookie
     const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder');
     if (isMock) {
       cookies().set('vldd_local_user', JSON.stringify({ name, phone, role: 'student' }), {
