@@ -8,7 +8,7 @@ import { Profile } from '@/types/database';
  */
 export function phoneToEmail(phone: string): string {
   const cleanPhone = phone.replace(/\D/g, '');
-  return `${cleanPhone}@vldd.local`;
+  return `${cleanPhone}@vlddnotes.com`;
 }
 
 /**
@@ -66,7 +66,7 @@ export const getSession = cache(async (): Promise<{
         created_at: new Date().toISOString(),
       };
       return {
-        user: { id: mockProfile.id, email: `${mockProfile.phone}@vldd.local` },
+        user: { id: mockProfile.id, email: `${mockProfile.phone}@vlddnotes.com` },
         profile: mockProfile,
       };
     }
