@@ -132,8 +132,8 @@ create trigger on_auth_user_created
 
 -- 11. Default Settings (upsert so re-running is safe)
 insert into public.settings (key, value) values
-  ('upi_id',             'vlddnotes@upi'),
-  ('whatsapp_number',    '919857041222'),
+  ('upi_id',             'inavneetbhadrecha@okhdfcbank'),
+  ('whatsapp_number',    '918571041222'),
   ('site_notice',        'Naye batch ke notes upload ho rahe hain!'),
   ('site_notice_active', 'true'),
   ('bundle_password',    'VLDD99')

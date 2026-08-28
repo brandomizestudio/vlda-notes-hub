@@ -43,8 +43,8 @@ export const SECTION_COPY = {
 };
 
 export const FALLBACK_SETTINGS = {
-  upi_id: 'vlddnotes@upi',
-  whatsapp_number: '919857041222',
+  upi_id: 'inavneetbhadrecha@okhdfcbank',
+  whatsapp_number: '918571041222',
   site_notice: 'Naye batch ke notes upload ho rahe hain! Kisi bhi sahayata ke liye WhatsApp karein.',
   site_notice_active: 'true',
   bundle_password: 'VLDD99',

@@ -44,7 +44,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
         <Input
           label="Official UPI ID (QR Code & Payment Deep Links)"
-          placeholder="vlddnotes@upi"
+          placeholder="inavneetbhadrecha@okhdfcbank"
           value={upiId}
           onChange={(e) => setUpiId(e.target.value)}
           required
@@ -53,7 +53,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
         <Input
           label="WhatsApp Support Number (10 digit bina +91 ke)"
-          placeholder="9876543210"
+          placeholder="8571041222"
           value={whatsappNumber}
           onChange={(e) => setWhatsappNumber(e.target.value)}
           required

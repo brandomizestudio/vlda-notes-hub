@@ -184,8 +184,8 @@ set
 -- 3. Seed Settings
 insert into public.settings (key, value)
 values
-  ('upi_id', 'vlddnotes@upi'),
-  ('whatsapp_number', '919857041222'),
+  ('upi_id', 'inavneetbhadrecha@okhdfcbank'),
+  ('whatsapp_number', '918571041222'),
   ('site_notice', 'Naye batch ke notes upload ho rahe hain! Kisi bhi sahayata ke liye WhatsApp karein.'),
   ('site_notice_active', 'true')
 on conflict (key) do update

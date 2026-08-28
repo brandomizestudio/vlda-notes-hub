@@ -513,7 +513,7 @@ export default function StyleguidePage() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-ink-3">UPI ID:</span>
-                    <span className="font-mono text-xs text-ink-2 font-semibold">vlddnotes@upi</span>
+                    <span className="font-mono text-xs text-ink-2 font-semibold">inavneetbhadrecha@okhdfcbank</span>
                   </div>
                 </div>
                 <Button

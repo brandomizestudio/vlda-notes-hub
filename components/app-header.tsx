@@ -8,7 +8,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { logoutAction } from '@/app/actions/auth';
 import { cn } from '@/lib/utils';
-import { BATCHES } from '@/lib/constants';
+import { BATCHES, FALLBACK_SETTINGS } from '@/lib/constants';
 
 interface AppHeaderProps {
   studentName: string;
@@ -23,7 +23,7 @@ export function AppHeader({
   unlockedCount,
   siteNotice,
   isNoticeActive = false,
-  whatsappNumber = '919876543210',
+  whatsappNumber = FALLBACK_SETTINGS.whatsapp_number,
 }: AppHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
