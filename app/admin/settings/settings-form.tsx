@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/toaster';
 import { Save, Key } from 'lucide-react';
 import { FALLBACK_SETTINGS } from '@/lib/constants';
+import { saveSettingsAction } from '@/app/actions/settings';
 
 interface SettingsFormProps {
   initialSettings: Record<string, string>;
@@ -27,14 +28,29 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   );
   const [loading, setLoading] = React.useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
+    let cleanWa = whatsappNumber.replace(/\D/g, '');
+    if (cleanWa.length === 10) {
+      cleanWa = '91' + cleanWa;
+    }
+
+    const res = await saveSettingsAction({
+      upi_id: upiId.trim(),
+      whatsapp_number: cleanWa,
+      site_notice: siteNotice.trim(),
+      site_notice_active: isNoticeActive ? 'true' : 'false',
+      bundle_password: bundlePassword.trim().toUpperCase(),
+    });
+
+    setLoading(false);
+    if (res.success) {
       toast('Settings update ho gayi!');
-    }, 600);
+    } else {
+      toast(res.error || 'Failed to update settings');
+    }
   };
 
   return (
